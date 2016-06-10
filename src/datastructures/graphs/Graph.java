@@ -1,6 +1,8 @@
 package datastructures.graphs;
 
 import datastructures.Queue;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +15,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class Graph<T> {
-    final Map<Vertex<T>, List<Vertex<T>>> adjacencyLists;
+    private final Map<Vertex<T>, List<Vertex<T>>> adjacencyLists;
     private final Map<Vertex<T>, BFS> memoizedBFS;
 
 
@@ -43,7 +45,7 @@ public class Graph<T> {
                 .forEach(entry -> entry.getValue().remove(entry.getKey()));
     }
 
-    private Vertex<T> find(Iterable<Vertex<T>> existingVertices, T key) {
+    private @Nullable Vertex<T> find(Iterable<Vertex<T>> existingVertices, T key) {
         for (Vertex<T> existingVertice : existingVertices) {
             if (existingVertice.data.equals(key)) {
                 return existingVertice;
@@ -106,7 +108,7 @@ public class Graph<T> {
             }
         }
 
-        private BFSWrapper<T> find(Iterable<BFSWrapper<T>> createdWrappers, Vertex<T> key) {
+        private @Nullable BFSWrapper<T> find(Iterable<BFSWrapper<T>> createdWrappers, Vertex<T> key) {
             for (BFSWrapper<T> createdWrapper : createdWrappers) {
                 if (createdWrapper.vertex.equals(key)) {
                     return createdWrapper;
@@ -159,7 +161,6 @@ public class Graph<T> {
             if (sink.parent == null) {
                 return "No path exists";
             }
-
             return sink.vertex.data + " <= " + print(sourceWrapper, sink.parent);
         }
 
@@ -176,6 +177,7 @@ public class Graph<T> {
         }
     }
 
+    @Contract(pure = true)
     @Override
     public final String toString() {
         return "Graph{" + "adjacencyLists=" + adjacencyLists +

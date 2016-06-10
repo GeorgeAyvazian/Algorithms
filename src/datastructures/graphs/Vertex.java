@@ -1,5 +1,7 @@
 package datastructures.graphs;
 
+import org.jetbrains.annotations.Contract;
+
 import java.util.Objects;
 
 class Vertex<T> {
@@ -11,6 +13,7 @@ class Vertex<T> {
         this.data = data;
     }
 
+    @Contract(pure = true)
     @Override
     public final String toString() {
         return "Vertex{" + "data=" + data +

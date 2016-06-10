@@ -1,5 +1,9 @@
 package datastructures;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 
 public class Queue<T> {
@@ -30,11 +34,12 @@ public class Queue<T> {
         return top == bottom && data[bottom] == null;
     }
     
+    @Contract(pure = true)
     private boolean isFull() {
         return top == bottom && data[bottom] != null;
     }
 
-    public final T dequeue() {
+    public final @Nullable T dequeue() {
         if (isEmpty()) {
             return null;
         }
@@ -68,7 +73,7 @@ public class Queue<T> {
 
 
     @Override
-    public final String toString() {
+    public final @NotNull String toString() {
         final StringBuilder sb = new StringBuilder("Queue{");
         sb.append("capacity=").append(capacity);
         sb.append(", data=").append(Arrays.toString(data));
