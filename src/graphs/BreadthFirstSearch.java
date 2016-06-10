@@ -1,7 +1,6 @@
 package graphs;
 
 import datastructures.graphs.Graph;
-import datastructures.graphs.Vertex;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,14 +14,11 @@ public enum BreadthFirstSearch {
         Character source = 'a';
         Character sink = 'b';
         Character sink2 = 'c';
-        Vertex<Character> a = new Vertex<>(source);
-        Vertex<Character> b = new Vertex<>(sink);
-        Vertex<Character> c = new Vertex<>(sink2);
-        List<Vertex<Character>> adjacencyListForA = Arrays.asList(b, c);
-        List<Vertex<Character>> adjacencyListForB = Collections.singletonList(c);
-        Map<Vertex<Character>, List<Vertex<Character>>> adjacencyLists = new HashMap<>();
-        adjacencyLists.put(a, adjacencyListForA);
-        adjacencyLists.put(b, adjacencyListForB);
+        List<Character> adjacencyListForA = Arrays.asList(sink, sink2);
+        List<Character> adjacencyListForB = Collections.singletonList(sink2);
+        Map<Character, List<Character>> adjacencyLists = new HashMap<>();
+        adjacencyLists.put(source, adjacencyListForA);
+        adjacencyLists.put(sink, adjacencyListForB);
         Graph<Character> graph = new Graph<>(adjacencyLists);
         System.out.println(graph.breadthFirstSearch(sink2, sink));
         System.out.println(graph.breadthFirstSearch(sink, sink2));
