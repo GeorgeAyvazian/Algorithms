@@ -30,11 +30,11 @@ public class Queue<T> {
         return top == bottom && data[bottom] == null;
     }
     
-    public boolean isFull() {
+    private boolean isFull() {
         return top == bottom && data[bottom] != null;
     }
 
-    public T dequeue() {
+    public final T dequeue() {
         if (isEmpty()) {
             return null;
         }
@@ -44,7 +44,7 @@ public class Queue<T> {
         return retVal;
     }
 
-    public void enqueue(T object) {
+    public final void enqueue(T object) {
         if (isFull()) {
             copy();
         }
@@ -68,7 +68,7 @@ public class Queue<T> {
 
 
     @Override
-    public String toString() {
+    public final String toString() {
         final StringBuilder sb = new StringBuilder("Queue{");
         sb.append("capacity=").append(capacity);
         sb.append(", data=").append(Arrays.toString(data));
