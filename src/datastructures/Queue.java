@@ -2,14 +2,14 @@ package datastructures;
 
 import java.util.Arrays;
 
-public class Queue {
+public class Queue<T> {
     private int capacity = 10;
-    private Object[] data = new Object[capacity];
+    private T[] data = (T[]) new Object[capacity];
     private int top, bottom;
 
 
     public static void main(String[] args) {
-        Queue queue = new Queue();
+        Queue<Integer> queue = new Queue<>();
         queue.enqueue(1);
         queue.enqueue(1);
         queue.enqueue(1);
@@ -34,17 +34,17 @@ public class Queue {
         return top == bottom && data[bottom] != null;
     }
 
-    public Object dequeue() {
+    public T dequeue() {
         if (isEmpty()) {
             return null;
         }
-        Object retVal = data[top];
+        T retVal = data[top];
         data[top] = null;
         top = (top + 1) % capacity;
         return retVal;
     }
 
-    public void enqueue(Object object) {
+    public void enqueue(T object) {
         if (isFull()) {
             copy();
         }
@@ -54,7 +54,7 @@ public class Queue {
 
     private void copy() {
         int newCapacity = capacity << 1;
-        Object[] newData = new Object[newCapacity];
+        T[] newData = (T[]) new Object[newCapacity];
         int j = 0;
         for (int i = top; j < capacity; i = (i + 1) % capacity, j++) {
             newData[j] = data[i];
