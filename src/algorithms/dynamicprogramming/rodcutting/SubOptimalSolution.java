@@ -1,8 +1,8 @@
-package dynamicprogramming.rodcutting;
+package algorithms.dynamicprogramming.rodcutting;
 
-import static dynamicprogramming.rodcutting.RodPriceTable.getOptimalRevenue;
-import static dynamicprogramming.rodcutting.RodPriceTable.getPrice;
-import static dynamicprogramming.rodcutting.RodPriceTable.setOptimalRevenue;
+import static algorithms.dynamicprogramming.rodcutting.RodPriceTable.getOptimalRevenue;
+import static algorithms.dynamicprogramming.rodcutting.RodPriceTable.getPrice;
+import static algorithms.dynamicprogramming.rodcutting.RodPriceTable.setOptimalRevenue;
 
 /**
  * The optimal revenue for a rod of length n

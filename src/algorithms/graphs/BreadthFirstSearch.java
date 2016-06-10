@@ -1,4 +1,4 @@
-package graphs;
+package algorithms.graphs;
 
 import datastructures.graphs.Graph;
 

@@ -1,4 +1,4 @@
-package dynamicprogramming.rodcutting;
+package algorithms.dynamicprogramming.rodcutting;
 
 import java.util.HashMap;
 import java.util.Map;
