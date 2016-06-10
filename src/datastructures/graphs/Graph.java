@@ -117,13 +117,6 @@ public class Graph<T> {
             return null;
         }
 
-        private BFSWrapper<T> findSource() {
-            return adjacencyListWrapper.keySet().stream()
-                    .filter(wrapper -> wrapper.vertex.data.equals(source))
-                    .findAny()
-                    .orElse(null);
-        }
-
         private BFSWrapper<T> find(T data) {
             return adjacencyListWrapper.keySet().stream()
                     .filter(wrapper -> wrapper.vertex.data.equals(data))
@@ -133,7 +126,7 @@ public class Graph<T> {
 
         final void breadthFirstSearch() {
             Queue<BFSWrapper<T>> queue = new Queue<>();
-            queue.enqueue(findSource());
+            queue.enqueue(find(source));
             while (!queue.isEmpty()) {
                 BFSWrapper<T> u = queue.dequeue();
                 assert u != null;
@@ -151,7 +144,7 @@ public class Graph<T> {
         }
 
         final String print(T sink) {
-            return print(findSource(), find(sink));
+            return print(find(source), find(sink));
         }
 
         private String print(BFSWrapper<T> sourceWrapper, BFSWrapper<T> sink) {
