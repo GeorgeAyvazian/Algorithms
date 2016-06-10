@@ -134,6 +134,7 @@ public class Graph<T> {
             queue.enqueue(findSource());
             while (!queue.isEmpty()) {
                 BFSWrapper<T> u = queue.dequeue();
+                assert u != null;
                 List<BFSWrapper<T>> vertices = adjacencyListWrapper.get(u);
                 vertices.stream()
                         .filter(wrapper -> wrapper.color == Color.WHITE)
