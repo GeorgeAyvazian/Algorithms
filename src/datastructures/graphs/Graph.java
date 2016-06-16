@@ -1,7 +1,6 @@
 package datastructures.graphs;
 
 import datastructures.Queue;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -12,11 +11,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Graph<T> {
     private final Map<Vertex<T>, List<Vertex<T>>> adjacencyLists;
     private final Map<Vertex<T>, BFS> memoizedBFS;
+    private final Map<Vertex<T>, BFS> memoizedBFSAllPaths;
 
 
     public Graph(Map<T, List<T>> adjacencyListMap) {
@@ -41,6 +42,7 @@ public class Graph<T> {
             adjacencyLists.put(vertex, values);
         }
         memoizedBFS = new HashMap<Vertex<T>, BFS>(adjacencyLists.size());
+        memoizedBFSAllPaths = new HashMap<Vertex<T>, BFS>(adjacencyLists.size());
         adjacencyLists.entrySet().stream()
                 .forEach(entry -> entry.getValue().remove(entry.getKey()));
     }
@@ -54,7 +56,18 @@ public class Graph<T> {
         return null;
     }
 
-    public final String breadthFirstSearch(T source, T destination) {
+    public final String findAllPaths(T source, T destination) {
+        Vertex<T> sourceVertex = new Vertex<>(source);
+        BFS existingBFS = memoizedBFSAllPaths.get(sourceVertex);
+        if (existingBFS == null) {
+            existingBFS = new BFS(source);
+            existingBFS.allPathsSearch();
+            memoizedBFSAllPaths.put(sourceVertex, existingBFS);
+        }
+        return existingBFS.print(destination, false);
+    }
+
+    public final String findShortestPath(T source, T destination) {
         Vertex<T> sourceVertex = new Vertex<>(source);
         BFS existingBFS = memoizedBFS.get(sourceVertex);
         if (existingBFS == null) {
@@ -64,7 +77,6 @@ public class Graph<T> {
         }
         return existingBFS.print(destination);
     }
-
 
     /*
         BFS finds the shortest path from the source
@@ -136,8 +148,26 @@ public class Graph<T> {
                         .forEach(wrapper -> {
                             wrapper.color = Color.BLACK;
                             wrapper.distance = u.distance + 1;
-                            wrapper.parent = u;
+                            if(!wrapper.parents.contains(u))
+                                wrapper.parents.add(u);
                             queue.enqueue(wrapper);
+                        });
+                u.color = Color.BLACK;
+            }
+        }
+
+        final void allPathsSearch() {
+            Queue<BFSWrapper<T>> queue = new Queue<>(adjacencyListWrapper.keySet());
+            for (int i = 0; i < adjacencyListWrapper.keySet().size(); i++) {
+                BFSWrapper<T> u = queue.dequeue();
+                assert u != null;
+                List<BFSWrapper<T>> vertices = adjacencyListWrapper.get(u);
+                vertices.stream()
+                        .forEach(wrapper -> {
+                            wrapper.color = Color.BLACK;
+                            if (!wrapper.parents.contains(u)) {
+                                wrapper.parents.add(u);
+                            }
                         });
                 u.color = Color.BLACK;
             }
@@ -147,18 +177,46 @@ public class Graph<T> {
             return print(find(source), find(sink));
         }
 
+        final String print(T sink, boolean dummy) {
+            HashSet<BFSWrapper<T>> objects = new HashSet<>();
+            BFSWrapper<T> sink1 = find(sink);
+            return print(find(source), sink1, objects);
+        }
+
+        private String print(BFSWrapper<T> sourceWrapper, BFSWrapper<T> sink, Set<BFSWrapper<T>> seen) {
+            if (seen.contains(sink)) {
+                return "|";
+            }
+            seen.add(sink);
+            if (sink.vertex.data.equals(sourceWrapper.vertex.data)) {
+                return source.toString() + ';';
+            }
+            if (sink.parents.isEmpty()) {
+                return "No path exists;";
+            }
+            String s = "";
+            for (BFSWrapper<T> parent : sink.parents) {
+                s += sink.vertex.data + " <= " + print(sourceWrapper, parent, seen);
+            }
+            return s;
+        }
+
         private String print(BFSWrapper<T> sourceWrapper, BFSWrapper<T> sink) {
             if (sink.vertex.data.equals(sourceWrapper.vertex.data)) {
-                return source.toString();
+                return source.toString() + ';';
             }
-            if (sink.parent == null) {
-                return "No path exists";
+            if (sink.parents.isEmpty()) {
+                return "No path exists;";
             }
-            return sink.vertex.data + " <= " + print(sourceWrapper, sink.parent);
+            String s = "";
+            for (BFSWrapper<T> parent : sink.parents) {
+                s += sink.vertex.data + " <= " + print(sourceWrapper, parent);
+            }
+            return s;
         }
 
         class BFSWrapper<E> {
-            BFSWrapper<E> parent;
+            List<BFSWrapper<E>> parents = new ArrayList<>();
             Color color;
             int distance;
             final Vertex<E> vertex;
@@ -169,13 +227,5 @@ public class Graph<T> {
             }
         }
     }
-
-    @Contract(pure = true)
-    @Override
-    public final String toString() {
-        return "Graph{" + "adjacencyLists=" + adjacencyLists +
-                '}';
-    }
-
 }
 

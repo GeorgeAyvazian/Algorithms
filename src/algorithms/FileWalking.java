@@ -5,7 +5,6 @@ import datastructures.graphs.Graph;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,40 +37,39 @@ public class FileWalking {
     public static void main(String[] args) throws IOException {
         projectRootPath = args[0];
         Path projectRoot = Paths.get(projectRootPath);
-        Path ideaWorkspaceXMLPath = Paths.get(projectRootPath + "/.idea/workspace.xml");
-        int breakpointStart, breakpointEnd;
-        List<String> workspaceLines;
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(ideaWorkspaceXMLPath.toString())))) {
-            workspaceLines = bufferedReader.lines().map(String::trim).collect(Collectors.toList());
-            breakpointStart = workspaceLines.indexOf("<breakpoint-manager>") + 1;
-            breakpointEnd = workspaceLines.indexOf("</breakpoint-manager>");
-            for (int i = breakpointStart; i <= breakpointEnd; i++) {
-                workspaceLines.remove(breakpointStart);
-            }
-        }
+//        Path ideaWorkspaceXMLPath = Paths.get(projectRootPath + "/.idea/workspace.xml");
+        int breakpointStart = 0, breakpointEnd;
+        List<String> workspaceLines = new ArrayList<>();
+//        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(ideaWorkspaceXMLPath.toString())))) {
+//            workspaceLines = bufferedReader.lines().map(String::trim).collect(Collectors.toList());
+//            breakpointStart = workspaceLines.indexOf("<breakpoint-manager>") + 1;
+//            breakpointEnd = workspaceLines.indexOf("</breakpoint-manager>");
+//            for (int i = breakpointStart; i <= breakpointEnd; i++) {
+//                workspaceLines.remove(breakpointStart);
+//            }
+//        }
         workspaceLines.add(breakpointStart, "<breakpoints>");
         AtomicInteger atomicInteger = new AtomicInteger(breakpointStart);
         String pattern = Pattern.compile(".*" + args[1].toLowerCase() + ".*?\\{\\s*$").pattern();
         Pattern memberP = Pattern.compile("^\\s*?(private|protected)\\s*?([A-Z][^<|^>]+?)\\s+.*;.*");
+        Pattern genericTwoTypeParams = Pattern.compile("^\\s*?(private|protected)\\s*?([A-Z][^<|^>]+?<([^<|^>|^,]+?),([^<|^>|^,]+?)>)\\s+.*;.*");
+        Pattern genericOneTypeParams = Pattern.compile("^\\s*?(private|protected)\\s*?([A-Z][^<|^>]+?<([^<|^>|^,]+?)>)\\s+.*;.*");
         Map<String, List<String>> stringArrayListHashMap = new HashMap<>();
+
         Consumer<Path> memberOperation = path -> {
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(path.toString())))) {
                 List<String> lines = bufferedReader.lines().collect(Collectors.toList());
                 for (String line : lines) {
                     Matcher matcher = memberP.matcher(line);
+                    Matcher matcher1 = genericTwoTypeParams.matcher(line);
+                    Matcher matcher2 = genericOneTypeParams.matcher(line);
+                    String node = path.getFileName().toString().replace(".java", "");
                     if (matcher.matches()) {
-                        String node = path.getFileName().toString().replace(".java", "");
-                        List<String> strings1 = stringArrayListHashMap.get(node.toLowerCase());
-                        String group = matcher.group(2);
-                        if (strings1 == null) {
-                            List<String> strings = new ArrayList<>();
-                            strings.add(group.toLowerCase());
-                            stringArrayListHashMap.put(node.toLowerCase(), strings);
-                        } else {
-                            if (!strings1.contains(group)) {
-                                strings1.add(group.toLowerCase());
-                            }
-                        }
+                        x(stringArrayListHashMap, node, matcher.group(2));
+                    } else if (matcher1.matches()) {
+                        x(stringArrayListHashMap, node, matcher1.group(3), matcher1.group(4));
+                    } else if (matcher2.matches()) {
+                        x(stringArrayListHashMap, node, matcher2.group(3));
                     }
                 }
 
@@ -109,22 +107,55 @@ public class FileWalking {
         JavaFileVisitor visitor = new JavaFileVisitor(memberOperation);
         Files.walkFileTree(projectRoot, visitor);
         Graph<String> stringGraph = new Graph<>(stringArrayListHashMap);
-        System.out.println("==============>" + stringGraph.breadthFirstSearch("sku", "partner"));
+//        System.out.println("==============>" + stringGraph.findShortestPath("sku", "partner"));
+        System.out.println();
+        System.out.println("==============>" + stringGraph.findAllPaths("sku", "title"));
 
-        System.out.println(stringArrayListHashMap);
         workspaceLines.add(atomicInteger.incrementAndGet(), "</breakpoints>");
         workspaceLines.add(atomicInteger.incrementAndGet(), "<breakpoints-dialog>");
         workspaceLines.add(atomicInteger.incrementAndGet(), "<breakpoints-dialog />");
         workspaceLines.add(atomicInteger.incrementAndGet(), "</breakpoints-dialog>");
         workspaceLines.add(atomicInteger.incrementAndGet(), "<option name=\"time\" value=\"2\" />");
         workspaceLines.add(atomicInteger.incrementAndGet(), "</breakpoint-manager>");
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(ideaWorkspaceXMLPath.toString()))) {
-            for (String str : workspaceLines) {
-                bufferedWriter.write(str + '\n');
-            }
-            bufferedWriter.flush();
-        }
+//        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(ideaWorkspaceXMLPath.toString()))) {
+//            for (String str : workspaceLines) {
+//                bufferedWriter.write(str + '\n');
+//            }
+//            bufferedWriter.flush();
+//        }
         System.out.println(visitor.getJavaFilePaths());
+    }
+
+    private static Set<String> set = new HashSet<>();
+    static {
+        set.add("string");
+        set.add("integer");
+        set.add("double");
+        set.add("bigdecimal");
+        set.add("short");
+        set.add("long");
+        set.add("long");
+        set.add("character");
+        set.add("writelevel");
+        set.add("timestamp");
+        set.add("class");
+    }
+    private static void x(Map<String, List<String>> stringArrayListHashMap, String node, String... groups) {
+        String key = node.trim().toLowerCase();
+        for (String group : groups) {
+            String o = group.trim().toLowerCase();
+            if(set.contains(o)) continue;
+            List<String> strings1 = stringArrayListHashMap.get(key);
+            if (strings1 == null) {
+                List<String> strings = new ArrayList<>();
+                strings.add(o);
+                stringArrayListHashMap.put(key, strings);
+            } else {
+                if (!strings1.contains(o)) {
+                    strings1.add(o);
+                }
+            }
+        }
     }
 
     private static class JavaFileVisitor implements FileVisitor<Path> {
@@ -133,7 +164,9 @@ public class FileWalking {
         private final Collection<Path> javaFilePaths = new HashSet<>(100);
         private final Consumer<Path> fileOperation;
 
-        private JavaFileVisitor(Consumer<Path> fileOperation) {this.fileOperation = fileOperation;}
+        private JavaFileVisitor(Consumer<Path> fileOperation) {
+            this.fileOperation = fileOperation;
+        }
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {

@@ -1,15 +1,24 @@
 package datastructures;
 
+import datastructures.graphs.Graph;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
 
 public class Queue<T> {
     private int capacity = 10;
     private T[] data = (T[]) new Object[capacity];
     private int top, bottom;
+
+    public Queue(Set<T> set) {
+        set.forEach(this::enqueue);
+    }
+
+    public Queue() {}
 
 
     public static void main(String[] args) {
@@ -33,7 +42,7 @@ public class Queue<T> {
     public boolean isEmpty() {
         return top == bottom && data[bottom] == null;
     }
-    
+
     @Contract(pure = true)
     private boolean isFull() {
         return top == bottom && data[bottom] != null;
@@ -71,6 +80,14 @@ public class Queue<T> {
         bottom = j;
     }
 
+    public boolean contains(T obj) {
+        for (T t : data) {
+            if (Objects.equals(obj, t)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public final @NotNull String toString() {
