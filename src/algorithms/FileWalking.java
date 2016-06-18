@@ -109,7 +109,9 @@ public class FileWalking {
         Graph<String> stringGraph = new Graph<>(stringArrayListHashMap);
 //        System.out.println("==============>" + stringGraph.findShortestPath("sku", "partner"));
         System.out.println();
-        System.out.println("==============>" + stringGraph.findAllPaths("sku", "title"));
+//        System.out.println("==============>" + stringGraph.findAllPaths("trusttransfer", "paymentinvoice"));
+//        System.out.println("==============>" + stringGraph.findShortestPath("paymentinvoicetrusttransfer", "receipt"));
+        System.out.println("==============>" + stringGraph.findAllPaths("paymentinvoicetrusttransfer", "receipt"));
 
         workspaceLines.add(atomicInteger.incrementAndGet(), "</breakpoints>");
         workspaceLines.add(atomicInteger.incrementAndGet(), "<breakpoints-dialog>");
@@ -123,7 +125,7 @@ public class FileWalking {
 //            }
 //            bufferedWriter.flush();
 //        }
-        System.out.println(visitor.getJavaFilePaths());
+//        System.out.println(visitor.getJavaFilePaths());
     }
 
     private static Set<String> set = new HashSet<>();

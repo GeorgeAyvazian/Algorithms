@@ -56,7 +56,7 @@ public class Graph<T> {
         return null;
     }
 
-    public final String findAllPaths(T source, T destination) {
+    public final List<List<String>> findAllPaths(T source, T destination) {
         Vertex<T> sourceVertex = new Vertex<>(source);
         BFS existingBFS = memoizedBFSAllPaths.get(sourceVertex);
         if (existingBFS == null) {
@@ -64,7 +64,12 @@ public class Graph<T> {
             existingBFS.allPathsSearch();
             memoizedBFSAllPaths.put(sourceVertex, existingBFS);
         }
-        return existingBFS.print(destination, false);
+        List<String> strings = new ArrayList<>();
+        strings.add(destination.toString());
+        List<List<String>> lists = new ArrayList<>();
+        lists.add(strings);
+        existingBFS.print(existingBFS.find(destination), lists);
+        return lists;
     }
 
     public final String findShortestPath(T source, T destination) {
@@ -177,10 +182,21 @@ public class Graph<T> {
             return print(find(source), find(sink));
         }
 
-        final String print(T sink, boolean dummy) {
-            HashSet<BFSWrapper<T>> objects = new HashSet<>();
-            BFSWrapper<T> sink1 = find(sink);
-            return print(find(source), sink1, objects);
+        final void print(BFSWrapper<T> sink, List<List<String>> paths) {
+            if (source.equals(sink.vertex.data)) {
+                List<String> strings = new ArrayList<>(paths.get(paths.size() - 1));
+                strings.remove(strings.size() - 1);
+                paths.get(paths.size() - 1).add(source.toString());
+                paths.get(paths.size() - 1).add("end");
+                paths.add(strings);
+                return;
+            }
+            for (BFSWrapper<T> parent : sink.parents) {
+                if (!paths.get(paths.size() - 1).contains(parent.vertex.data.toString())) {
+                    paths.get(paths.size() - 1).add(parent.vertex.data.toString());
+                    print(parent, paths);
+                }
+            }
         }
 
         private String print(BFSWrapper<T> sourceWrapper, BFSWrapper<T> sink, Set<BFSWrapper<T>> seen) {
@@ -225,7 +241,12 @@ public class Graph<T> {
                 this.vertex = vertex;
                 color = Color.WHITE;
             }
+            @Override
+            public String toString() {
+                return vertex.data.toString();
+            }
         }
+
     }
 }
 
